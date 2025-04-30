@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  database:
+    image: postgres:15
+    container_name: aso_db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: clinica
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    container_name: aso_backend
+    depends_on:
+      - database
+    environment:
+      DATABASE_URL: "postgresql://user:password@database:5432/aso"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    command: npm run start:dev
+
+volumes:
+  pgdata:

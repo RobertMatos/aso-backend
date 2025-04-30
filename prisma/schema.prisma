@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Definição dos ENUMs
+enum TipoExame {
+  ADMISSIONAL
+  PERIODICO
+  RETORNO_AO_TRABALHO
+  DEMISSIONAL
+  TRANSFERENCIA_FUNCAO
+}
+
+enum StatusFuncionario {
+  ATIVO
+  AFASTADO
+  DEMITIDO
+}
+
+enum ResultadoAtestado {
+  APTO
+  INAPTO
+}
+
+model Empresa {
+  id           String        @id @default(uuid())
+  nome         String
+  cnpj         String        @unique
+  telefone     String
+  email        String
+  createdAt    DateTime      @default(now())
+  funcionarios Funcionario[]
+  users        User[]        @relation("EmpresaUsers")
+}
+
+model Funcionario {
+  id        String            @id @default(uuid())
+  nome      String
+  cpf       String            @unique
+  telefone  String
+  status    StatusFuncionario
+  createdAt DateTime          @default(now())
+  empresaId String
+  empresa   Empresa           @relation(fields: [empresaId], references: [id])
+  exames    Exame[]
+  users     User[]            @relation("FuncionarioUsers")
+}
+
+model Exame {
+  id             String             @id @default(uuid())
+  tipo           TipoExame
+  dataRealizacao DateTime
+  funcionarioId  String
+  funcionario    Funcionario        @relation(fields: [funcionarioId], references: [id])
+  medicoId       String?
+  medico         Medico?            @relation(fields: [medicoId], references: [id])
+  resultado      ResultadoAtestado
+  createdAt      DateTime           @default(now())
+  atestado       Atestado?
+  riscos         RiscoOcupacional[]
+}
+
+model Medico {
+  id        String   @id @default(uuid())
+  nome      String
+  crm       String   @unique
+  telefone  String
+  email     String
+  createdAt DateTime @default(now())
+  exames    Exame[]
+  users     User[]   @relation("MedicoUsers")
+}
+
+model Atestado {
+  id        String   @id @default(uuid())
+  descricao String
+  data      DateTime
+  exameId   String   @unique
+  exame     Exame    @relation(fields: [exameId], references: [id])
+  arquivo   Bytes?
+}
+
+model RiscoOcupacional {
+  id     String  @id @default(uuid())
+  nome   String
+  exames Exame[]
+}
+
+model User {
+  id    String @id @default(uuid())
+  email String @unique
+  senha String
+  role  Role
+
+  empresaId String?
+  empresa   Empresa? @relation("EmpresaUsers", fields: [empresaId], references: [id])
+
+  funcionarioId String?
+  funcionario   Funcionario? @relation("FuncionarioUsers", fields: [funcionarioId], references: [id])
+
+  medicoId String?
+  medico   Medico? @relation("MedicoUsers", fields: [medicoId], references: [id])
+}
+
+enum Role {
+  EMPRESA
+  FUNCIONARIO
+  MEDICO
+}
