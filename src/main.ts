@@ -23,7 +23,11 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+  app.getHttpAdapter().getInstance().get('/healthz', (_req, res) => res.sendStatus(200));
 
-  await app.listen(process.env.PORT ?? 3000);
+  const portEnv = process.env.PORT;            // string | undefined
+  const port = portEnv ?? '3000';              // garante string
+  await app.listen(+port, '0.0.0.0');          // +port converte em number
+  console.log(`API rodando em 0.0.0.0:${port}`);
 }
 bootstrap();
