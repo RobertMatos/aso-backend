@@ -3,8 +3,8 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true,      // limpa dist antes do build :contentReference[oaicite:2]{index=2}
-    "assets": []               // você pode listar arquivos estáticos aqui
+    "deleteOutDir": true,      
+    "assets": []             
   },
-  "entryFile": "main"          // garante que o Nest use src/main.ts como entrada :contentReference[oaicite:3]{index=3}
+  "entryFile": "main"          
 }
