@@ -20,35 +20,35 @@ import { FilterExameDto } from './dto/filter-exame.dto';
 
 @Controller('exames')
 export class ExameController {
-  constructor(private readonly exameService: ExameService) {}
+  constructor(private readonly exameService: ExameService) { }
 
   @Get()
   async findAll(@Query() query: FilterExameDto) {
-    const { page = 1, limit = 10, funcionarioId, search } = query;
-
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ExameWhereInput = {
       AND: [
-        funcionarioId ? { funcionarioId } : {},
-        search
+        query.funcionarioId ? { funcionarioId: query.funcionarioId } : {},
+        query.search
           ? {
-              OR: [
-                {
-                  funcionario: {
-                    nome: {
-                      contains: search,
-                      mode: 'insensitive',
-                    },
+            OR: [
+              {
+                funcionario: {
+                  nome: {
+                    contains: query.search,
+                    mode: 'insensitive',
                   },
                 },
-                {
-                  tipo: {
-                    equals: search as any, // você pode querer validar ou tipar melhor aqui
-                  },
+              },
+              {
+                tipo: {
+                  equals: query.search as any, // ajuste conforme o enum ou tipo de 'tipo'
                 },
-              ],
-            }
+              },
+            ],
+          }
           : {},
       ],
     };
@@ -65,6 +65,7 @@ export class ExameController {
       lastPage: Math.ceil(total / limit),
     };
   }
+
 
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {

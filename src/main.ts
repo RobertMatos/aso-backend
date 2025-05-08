@@ -7,7 +7,7 @@ async function bootstrap() {
 
   // Libera CORS para todas as origens
   app.enableCors();
-
+  
   const config = new DocumentBuilder()
     .setTitle('Minha API')
     .setDescription('Documentação da API')
@@ -23,11 +23,11 @@ async function bootstrap() {
       'jwt-auth',
     )
     .build();
-
+  
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
   app.getHttpAdapter().getInstance().get('/healthz', (_req, res) => res.sendStatus(200));
-
+    
   const portEnv = process.env.PORT;
   const port = portEnv ?? '3000';
   await app.listen(+port, '0.0.0.0');
