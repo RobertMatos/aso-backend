@@ -27,10 +27,9 @@ export class AtestadoController {
     const {
       search,
       exameId,
-      page = 1,
-      limit = 10,
     } = query;
-
+    const page = Number(query.page ?? 1);
+    const limit = Number(query.limit ?? 10);
     const skip = (page - 1) * limit;
 
     const where: Prisma.AtestadoWhereInput = {
