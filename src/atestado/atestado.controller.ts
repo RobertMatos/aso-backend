@@ -16,18 +16,21 @@ import { UpdateAtestadoDto } from './dto/update-atestado.dto';
 import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { FilterAtestadoDto } from './dto/filter-atestado.dto';
 
 @Controller('atestados')
 export class AtestadoController {
   constructor(private readonly atestadoService: AtestadoService) {}
 
   @Get()
-  async findAll(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('search') search?: string,
-    @Query('exameId') exameId?: string,
-  ) {
+  async findAll(@Query() query: FilterAtestadoDto) {
+    const {
+      search,
+      exameId,
+      page = 1,
+      limit = 10,
+    } = query;
+
     const skip = (page - 1) * limit;
 
     const where: Prisma.AtestadoWhereInput = {
@@ -45,15 +48,15 @@ export class AtestadoController {
     };
 
     const [data, total] = await Promise.all([
-      this.atestadoService.findMany({ skip, take: +limit, where }),
+      this.atestadoService.findMany({ skip, take: limit, where }),
       this.atestadoService.count({ where }),
     ]);
 
     return {
       data,
       total,
-      page: +page,
-      lastPage: Math.ceil(total / +limit),
+      page,
+      lastPage: Math.ceil(total / limit),
     };
   }
 

@@ -29,8 +29,8 @@ export class CreateFuncionarioDto {
 
   @ApiProperty({
     description: 'Status do funcionário',
-    enum: StatusFuncionario, // Supondo que StatusFuncionario seja uma enum do Prisma
-    type: String,
+    enum: StatusFuncionario,
+    enumName: 'StatusFuncionario', // Isso melhora a exibição no Swagger
   })
   @IsEnum(StatusFuncionario)
   status: StatusFuncionario;

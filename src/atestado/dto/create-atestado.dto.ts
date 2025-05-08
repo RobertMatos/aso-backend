@@ -5,7 +5,7 @@ import {
   IsOptional,
   IsBase64,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateAtestadoDto {
   @ApiProperty({
@@ -30,12 +30,12 @@ export class CreateAtestadoDto {
   @IsUUID()
   exameId: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Arquivo em base64 (opcional)',
-    required: false,
     type: String,
   })
   @IsOptional()
   @IsBase64()
-  arquivo?: string; // Espera o conteúdo do arquivo como base64
+  arquivo?: string;
 }
+

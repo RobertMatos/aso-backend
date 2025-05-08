@@ -17,6 +17,7 @@ import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Public } from 'src/auth/decorators/public.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { FilterRiscoOcupacionalDto } from './dto/filter-risco-ocupacional.dto';
 
 @ApiBearerAuth('jwt-auth') 
 @Controller('riscos-ocupacionais')
@@ -27,11 +28,9 @@ export class RiscoOcupacionalController {
 
  
   @Get()
-  async findAll(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('search') search?: string,
-  ) {
+  async findAll(@Query() query: FilterRiscoOcupacionalDto) {
+    const { search, page = 1, limit = 10 } = query;
+
     const skip = (page - 1) * limit;
 
     const where: Prisma.RiscoOcupacionalWhereInput = search
@@ -44,15 +43,15 @@ export class RiscoOcupacionalController {
       : {};
 
     const [data, total] = await Promise.all([
-      this.riscoOcupacionalService.findMany({ skip, take: +limit, where }),
+      this.riscoOcupacionalService.findMany({ skip, take: limit, where }),
       this.riscoOcupacionalService.count({ where }),
     ]);
 
     return {
       data,
       total,
-      page: +page,
-      lastPage: Math.ceil(total / +limit),
+      page,
+      lastPage: Math.ceil(total / limit),
     };
   }
 

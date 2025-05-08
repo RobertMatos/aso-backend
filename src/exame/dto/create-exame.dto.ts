@@ -12,6 +12,7 @@ export class CreateExameDto {
   @ApiProperty({
     description: 'Tipo do exame',
     enum: TipoExame,
+    enumName: 'TipoExame', // Melhor para o Swagger
   })
   @IsEnum(TipoExame)
   tipo: TipoExame;
@@ -45,6 +46,7 @@ export class CreateExameDto {
   @ApiProperty({
     description: 'Resultado do atestado',
     enum: ResultadoAtestado,
+    enumName: 'ResultadoAtestado', // Melhor para o Swagger
   })
   @IsEnum(ResultadoAtestado)
   resultado: ResultadoAtestado;
