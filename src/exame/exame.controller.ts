@@ -24,8 +24,8 @@ export class ExameController {
 
   @Get()
   async findAll(@Query() query: FilterExameDto) {
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 10;
+    const page = Number(query.page ?? 1);
+    const limit = Number(query.limit ?? 10);
     const skip = (page - 1) * limit;
 
     const where: Prisma.ExameWhereInput = {
