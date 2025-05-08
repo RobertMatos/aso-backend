@@ -16,59 +16,55 @@ import { UpdateExameDto } from './dto/update-exame.dto';
 import { Prisma } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Public } from 'src/auth/decorators/public.decorator';
+import { FilterExameDto } from './dto/filter-exame.dto';
 
 @Controller('exames')
 export class ExameController {
   constructor(private readonly exameService: ExameService) {}
 
   @Get()
-async findAll(
-  @Query('page') pageStr = '1',
-  @Query('limit') limitStr = '10',
-  @Query('funcionarioId') funcionarioId?: string,
-  @Query('search') search?: string,
-) {
-  const page = Number(pageStr);
-  const limit = Number(limitStr);
-  const skip = (page - 1) * limit;
+  async findAll(@Query() query: FilterExameDto) {
+    const { page = 1, limit = 10, funcionarioId, search } = query;
 
-  const where: Prisma.ExameWhereInput = {
-    AND: [
-      funcionarioId ? { funcionarioId } : {},
-      search
-        ? {
-            OR: [
-              {
-                funcionario: {
-                  nome: {
-                    contains: search,
-                    mode: 'insensitive',
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.ExameWhereInput = {
+      AND: [
+        funcionarioId ? { funcionarioId } : {},
+        search
+          ? {
+              OR: [
+                {
+                  funcionario: {
+                    nome: {
+                      contains: search,
+                      mode: 'insensitive',
+                    },
                   },
                 },
-              },
-              {
-                tipo: {
-                  equals: search as any, // você pode querer validar ou tipar melhor aqui
+                {
+                  tipo: {
+                    equals: search as any, // você pode querer validar ou tipar melhor aqui
+                  },
                 },
-              },
-            ],
-          }
-        : {},
-    ],
-  };
+              ],
+            }
+          : {},
+      ],
+    };
 
-  const [data, total] = await Promise.all([
-    this.exameService.findMany({ skip, take: limit, where }),
-    this.exameService.count({ where }),
-  ]);
+    const [data, total] = await Promise.all([
+      this.exameService.findMany({ skip, take: limit, where }),
+      this.exameService.count({ where }),
+    ]);
 
-  return {
-    data,
-    total,
-    page,
-    lastPage: Math.ceil(total / limit),
-  };
-}
+    return {
+      data,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
+  }
 
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
