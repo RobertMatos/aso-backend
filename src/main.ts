@@ -8,9 +8,8 @@ import { Handler } from 'aws-lambda';
 
 const expressApp = express();
 
-// Aqui usamos 'as string' pra TS entender que é a assinatura de rota + handler
-expressApp.get('/' as string, (_req, res) => res.send('✅ NestJS Serverless ativo'));
-expressApp.get('/healthz' as string, (_req, res) => res.sendStatus(200));
+expressApp.get('/', (_req, res) => res.send('✅ NestJS Serverless ativo'));
+expressApp.get('/healthz', (_req, res) => res.sendStatus(200));
 
 let cachedServer: Handler;
 
