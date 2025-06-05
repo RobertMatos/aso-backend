@@ -8,9 +8,6 @@ import { Handler } from 'aws-lambda';
 
 const expressApp = express();
 
-expressApp.get('/', (_req, res) => res.send('✅ NestJS Serverless ativo'));
-expressApp.get('/healthz', (_req, res) => res.sendStatus(200));
-
 let cachedServer: Handler;
 
 async function waitForDb(ms = 1000, retries = 10): Promise<void> {
