@@ -1,13 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ExpressAdapter } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as express from 'express';
+import { createServer, proxy } from 'aws-serverless-express';
+import { Handler } from 'aws-lambda';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+const expressApp = express();
+let cachedServer: Handler;
 
-  // Libera CORS para todas as origens
+async function bootstrapServer(): Promise<Handler> {
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
+
   app.enableCors();
-  
+
   const config = new DocumentBuilder()
     .setTitle('Minha API')
     .setDescription('Documentação da API')
@@ -23,14 +29,21 @@ async function bootstrap() {
       'jwt-auth',
     )
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
   app.getHttpAdapter().getInstance().get('/healthz', (_req, res) => res.sendStatus(200));
-    
-  const portEnv = process.env.PORT;
-  const port = portEnv ?? '3000';
-  await app.listen(+port, '0.0.0.0');
-  console.log(`API rodando em 0.0.0.0:${port}`);
+
+  await app.init();
+
+  return createServer(expressApp);
 }
-bootstrap();
+
+export const handler = async (event: any, context: any) => {
+  if (!cachedServer) {
+    cachedServer = await bootstrapServer();
+  }
+
+  return proxy(cachedServer, event, context, 'PROMISE').promise;
+};
