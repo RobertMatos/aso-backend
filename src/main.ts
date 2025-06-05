@@ -14,6 +14,10 @@ async function bootstrapServer(): Promise<Handler> {
 
   app.enableCors();
 
+  // Rota básica para health check e validação
+  expressApp.get('/', (_req, res) => res.send('✅ NestJS Serverless ativo'));
+  expressApp.get('/healthz', (_req, res) => res.sendStatus(200));
+
   const config = new DocumentBuilder()
     .setTitle('Minha API')
     .setDescription('Documentação da API')
@@ -32,8 +36,6 @@ async function bootstrapServer(): Promise<Handler> {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-
-  app.getHttpAdapter().getInstance().get('/healthz', (_req, res) => res.sendStatus(200));
 
   await app.init();
 
