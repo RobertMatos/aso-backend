@@ -8,11 +8,33 @@ import { Handler } from 'aws-lambda';
 
 const expressApp = express();
 
+expressApp.get('/', (_req, res) => res.send('✅ NestJS Serverless ativo'));
+expressApp.get('/healthz', (_req, res) => res.sendStatus(200));
+
 let cachedServer: Handler;
 
-async function bootstrapServer(): Promise<Handler> {
-  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
+async function waitForDb(ms = 1000, retries = 10): Promise<void> {
+  const { PrismaClient } = await import('@prisma/client');
+  const prisma = new PrismaClient();
 
+  for (let i = 0; i < retries; i++) {
+    try {
+      await prisma.$connect();
+      await prisma.$disconnect();
+      console.log('✅ Banco conectado com sucesso.');
+      return;
+    } catch (err) {
+      console.warn(`⏳ Aguardando banco... Tentativa ${i + 1}/${retries}`);
+      await new Promise(res => setTimeout(res, ms));
+    }
+  }
+  throw new Error('❌ Banco não respondeu a tempo.');
+}
+
+async function bootstrapServer(): Promise<Handler> {
+  await waitForDb(); // Espera o banco iniciar
+
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
   app.enableCors();
 
   const config = new DocumentBuilder()
