@@ -1,4 +1,4 @@
-import express from 'express'; // ou import express = require('express');
+import express from 'express';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
@@ -7,10 +7,12 @@ import { createServer, proxy } from 'aws-serverless-express';
 import { Handler } from 'aws-lambda';
 
 const expressApp = express();
-let cachedServer: Handler;
 
-expressApp.get('/', (_req: express.Request, res: express.Response) => res.send('✅ NestJS Serverless ativo'));
-expressApp.get('/healthz', (_req: express.Request, res: express.Response) => res.sendStatus(200));
+// Aqui usamos 'as string' pra TS entender que é a assinatura de rota + handler
+expressApp.get('/' as string, (_req, res) => res.send('✅ NestJS Serverless ativo'));
+expressApp.get('/healthz' as string, (_req, res) => res.sendStatus(200));
+
+let cachedServer: Handler;
 
 async function bootstrapServer(): Promise<Handler> {
   const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp));
